@@ -227,7 +227,7 @@ namespace ofxARDrone {
     
     //--------------------------------------------------------------
     void Controller::queueCommand(string cs) {
-        ofLogVerbose("ofxARDrone::Controller::queueCommand - " + cs);
+       // ofLogVerbose("ofxARDrone::Controller::queueCommand - " + cs);
         
         cs += 0x0D;
         cs += 0x0A; // TODO: is this one needed?

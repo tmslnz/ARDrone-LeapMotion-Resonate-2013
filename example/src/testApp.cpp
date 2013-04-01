@@ -45,27 +45,109 @@ void testApp::setup(){
     
     // setup osc so we can send & receive commands from another app to this one, to forward onto the drone (OPTIONAL)
     droneOsc.setup(&drone, 8000, 9000);
-    
+  
+  
+  
+    // Leap!
+  leap = 0;
+  
 }
 
 //--------------------------------------------------------------
 void testApp::update() {
-    if(doPause) return;
-
-    {
+  
+  // check for the leap
+  if (ofGetElapsedTimef() > 1.0f && !leap) {
+    leap = new ofxLeapMotion();
+    leap->open();
+  }
+  
+  if(leap && leap->isFrameNew()) {
+    simplehands = leap->getSimpleHands();
+    if (simplehands.size() > 0) {
+      ofxLeapMotionSimpleHand hand = simplehands.at(0);
+      if (hand.fingers.size() > 0) {
+        
+        //ofxLeapMotionSimpleHand::simpleFinger finger = hand.fingers.at(0);
+        //lastLeapPosition = finger.;
+        
+        float displacementRatio;
         float s = 0.02;
         
+        if(hand.handPos.y > 400){
+          displacementRatio = (hand.handPos.y - 400)/100;
+          printf("displacementRatio: %f \n", displacementRatio);
+          if(drone.controller.liftSpeed < displacementRatio){
+            drone.controller.liftSpeed += s;
+          }
+        }else if(hand.handPos.y < 150){
+          displacementRatio = -1*(hand.handPos.y)/100;
+          if(drone.controller.liftSpeed > displacementRatio){
+            drone.controller.liftSpeed -= s;
+          }
+        }else{
+          drone.controller.liftSpeed = 0;
+        }
+        
+        
+        if(hand.handPos.x > 50){
+          displacementRatio = (hand.handPos.x - 50)/100;
+          if(drone.controller.rollAmount < displacementRatio){
+            drone.controller.rollAmount -= s;
+          }
+        }else if(hand.handPos.x < -50){
+          displacementRatio = (hand.handPos.x - 50)/100;
+          if(drone.controller.rollAmount > displacementRatio){
+            drone.controller.rollAmount += s;
+          }
+        }else{
+          drone.controller.rollAmount = 0;
+        }
+        
+        if(hand.handPos.z > 50){
+          displacementRatio = (hand.handPos.z - 50)/100;
+          if(drone.controller.pitchAmount < displacementRatio){
+            drone.controller.pitchAmount -= s;
+          }
+        }else if(hand.handPos.z < -50){
+          displacementRatio = (hand.handPos.z - 50)/100;
+          if(drone.controller.pitchAmount > displacementRatio){
+            drone.controller.pitchAmount += s;
+          }
+        }else{
+          drone.controller.pitchAmount = 0;
+        }
+        
+        
+        //printf("this is the position we don't get: %f\n", hand.handPos.y);
+        hasLeapPosition = true;
+      }
+    } else {
+      drone.controller.liftSpeed = 0;
+      drone.controller.rollAmount = 0;
+      drone.controller.pitchAmount = 0;
+      //hasLeapPosition = false;
+      
+    }
+  }
+  
+  
+    if(doPause) return;
+    {
+        float s = 0.02;
+      
         if(keys[OF_KEY_UP]) drone.controller.pitchAmount -= s;
         else if(keys[OF_KEY_DOWN]) drone.controller.pitchAmount += s;
 
-        if(keys['a']) drone.controller.rollAmount -= s;
-        else if(keys['d']) drone.controller.rollAmount += s;
+       // if(keys['a']) drone.controller.rollAmount -= s;
+       // else if(keys['d']) drone.controller.rollAmount += s;
 
         if(keys['w']) drone.controller.liftSpeed += s;
         else if(keys['s']) drone.controller.liftSpeed -= s;
         
-        if(keys[OF_KEY_LEFT]) drone.controller.spinSpeed -= s;
-        else if(keys[OF_KEY_RIGHT]) drone.controller.spinSpeed += s;
+        if(keys['a']) drone.controller.spinSpeed -= s;
+        else if(keys['d']) drone.controller.spinSpeed += s;
+      
 
     }
     

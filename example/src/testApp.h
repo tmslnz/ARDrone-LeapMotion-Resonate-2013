@@ -13,6 +13,7 @@
 #include "ofMain.h"
 #include "ofxARDrone.h"
 #include "ofxARDroneOscBridge.h"
+#include "ofxLeapMotion.h"
 
 class testApp : public ofBaseApp {
 public:
@@ -38,4 +39,11 @@ public:
     void mousePressed(int x, int y, int button);
     void mouseReleased(int x, int y, int button);
     void windowResized(int w, int h);
+  
+  
+  
+    ofxLeapMotion *leap;
+    vector<ofxLeapMotionSimpleHand> simplehands;
+    bool hasLeapPosition;
+    ofVec3f lastLeapPosition;
 };
